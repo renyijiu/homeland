@@ -31,6 +31,8 @@ class Topic < ApplicationRecord
   validates :user_id, :title, :body, :node_id, presence: true
 
   counter :hits, default: 0
+  list :seven_days_hits, maxlength: 7
+  list :recent_day_hits, maxlength: 24
 
   delegate :login, to: :user, prefix: true, allow_nil: true
   delegate :body, to: :last_reply, prefix: true, allow_nil: true
@@ -207,6 +209,34 @@ class Topic < ApplicationRecord
   def floor_of_reply(reply)
     reply_index = reply_ids.index(reply.id)
     reply_index + 1
+  end
+
+  def hot_hits_incr(num)
+    current_time = Time.current
+    day = current_time.strftime("%d").to_i
+    hour = current_time.strftime("%H").to_i
+
+    last_update_time = self.last_update_time_for_hits.to_h
+    last_day = last_update_time.fetch("day", -1).to_i
+    last_hour = last_update_time.fetch("hour", -1).to_i
+
+    if (last_day == day) && (!self.seven_days_hits.last.nil?)
+      _tmp_day_hits = self.seven_days_hits[-1].to_i
+      _tmp_day_hits += num
+      self.seven_days_hits[-1] = _tmp_day_hits
+    else
+      self.seven_days_hits << num
+      self.last_update_time_for_hits["day"] = day
+    end
+
+    if (last_hour == hour) && (!self.recent_day_hits.last.nil?)
+      _tmp_hour_hits = self.recent_day_hits[-1].to_i
+      _tmp_hour_hits += num
+      self.recent_day_hits[-1] = _tmp_hour_hits
+    else
+      self.recent_day_hits << num
+      self.last_update_time_for_hits["hour"] = hour
+    end
   end
 
   def self.notify_topic_created(topic_id)

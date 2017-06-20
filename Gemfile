@@ -132,6 +132,7 @@ group :development do
   gem 'better_errors'
   gem 'spring'
   gem 'spring-commands-rspec'
+  gem 'pry-byebug', '~> 3.4', '>= 3.4.2'
 end
 
 group :development, :test do

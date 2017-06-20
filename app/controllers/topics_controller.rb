@@ -86,6 +86,7 @@ class TopicsController < ApplicationController
     @topic = Topic.unscoped.includes(:user).find(params[:id])
     render_404 if @topic.deleted?
 
+    @topic.hot_hits_incr(1)
     @topic.hits.incr(1)
     @node = @topic.node
     @show_raw = params[:raw] == "1"
