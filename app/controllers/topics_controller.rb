@@ -62,6 +62,26 @@ class TopicsController < ApplicationController
     end
   end
 
+  def hot_7d
+    @topics = Rails.cache.fetch("topics/hot_7d", expires_in: 1.hour) do
+      Topic.without_hide_nodes.order(week_score: :desc).limit(100)
+    end
+
+    @topics = @topics.page(params[:page])
+    @page_title = [t("topics.topic_list.hot_7d"), t("menu.topics")].join(" · ")
+    render action: "index"
+  end
+
+  def hot_24h
+    @topics = Rails.cache.fetch("topics/hot_24h", expires_in: 10.minutes) do
+      Topic.without_hide_nodes.order(day_score: :desc).limit(100)
+    end
+
+    @topics = @topics.page(params[:page])
+    @page_title = [t("topics.topic_list.hot_24h"), t("menu.topics")].join(" · ")
+    render action: "index"
+  end
+
   # GET /topics/favorites
   def favorites
     @topics = current_user.favorite_topics.includes(:user)

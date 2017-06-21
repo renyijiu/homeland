@@ -73,6 +73,8 @@ Rails.application.routes.draw do
       get :popular
       get :excellent
       get :favorites
+      get :hot_7d
+      get :hot_24h
       get :feed, defaults: { format: 'xml' }
       post :preview
     end

@@ -16,6 +16,8 @@
       popular: "Popular Topics"
       no_reply: "Unactive Topics"
       excellent: "Excellent Topics"
+      hot_7d: "Week Hot Topics"
+      hot_24h: "24h Hot Topics"
     read_topic: "Read Topic"
     create_topic_success: "Topic created successfully."
     delete_topic_success: "Topic deleted successfully.."
