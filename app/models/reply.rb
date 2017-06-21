@@ -5,6 +5,7 @@ class Reply < ApplicationRecord
   include Mentionable
   include MentionTopic
   include UserAvatarDelegate
+  include UpdateScore
 
   UPVOTES = %w(+1 :+1: :thumbsup: :plus1: 👍 👍🏻 👍🏼 👍🏽 👍🏾 👍🏿)
 

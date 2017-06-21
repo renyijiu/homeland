@@ -267,6 +267,20 @@ class Topic < ApplicationRecord
     last_day_count
   end
 
+  # 获取7天内的访问数据
+  def get_last_week_hits_count
+    tmp_count_array = self.seven_days_hits.to_a
+    tmp_count_array = unshift_fill_array(tmp_count_array, 7)
+    tmp_count_array
+  end
+
+  # 获取24小时内的访问数据
+  def get_last_day_hits_count
+    tmp_count_array = self.recent_day_hits.to_a
+    tmp_count_array = unshift_fill_array(tmp_count_array, 24)
+    tmp_count_array
+  end
+
   def self.notify_topic_created(topic_id)
     topic = Topic.find_by_id(topic_id)
     return unless topic && topic.user

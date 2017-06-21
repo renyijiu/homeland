@@ -150,6 +150,23 @@ class ApplicationController < ActionController::Base
     redirect_to auth_sso_path if Setting.sso_enabled?
   end
 
+  def set_score_for_topic
+    return unless @topic
+    week_visit_count = @topic.get_last_week_hits_count
+    day_visit_count = @topic.get_last_day_hits_count
+
+    week_replies_count = @topic.last_week_replies_count
+    day_replies_count = @topic.last_day_replies_count
+
+    week_score = cal_score_for_topic(week_visit_count, week_replies_count)
+    day_score = cal_score_for_topic(day_visit_count, day_replies_count)
+
+    @topic.day_score = day_score
+    @topic.week_score = week_score
+    @topic.save
+  end
+
+
   private
 
   def user_locale
@@ -159,5 +176,19 @@ class ApplicationController < ActionController::Base
   def http_head_locale
     return nil if Setting.auto_locale == false
     http_accept_language.language_region_compatible_from(I18n.available_locales)
+  end
+
+  def cal_score_for_topic(visit_count, replies_count)
+    score = 0
+    return score unless visit_count.size == replies_count.size
+    
+    len = visit_count.size
+    len.times do |i|
+      tmp_visit_value = visit_count[i].to_i
+      tmp_replies_value = replies_count[i].to_i
+
+      score += ((tmp_visit_value + tmp_replies_value*3) * (i + 1))
+    end
+    score
   end
 end

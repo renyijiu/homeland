@@ -8,6 +8,8 @@ class TopicsController < ApplicationController
   before_action :set_topic, only: [:ban, :edit, :update, :destroy, :follow,
                                    :unfollow, :action, :ban]
 
+  after_action :set_score_for_topic, only: [:show]                                   
+
   def index
     @suggest_topics = []
     if params[:page].to_i <= 1
