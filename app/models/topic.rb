@@ -239,6 +239,34 @@ class Topic < ApplicationRecord
     end
   end
 
+  # 问题一周内的回复数，按天排序
+  def last_week_replies_count
+    replies = self.replies.within_seven_days
+    result_hash = get_last_week_hash
+    
+    replies.each do |reply|
+      date = reply.created_at.strftime("%m%d")
+      result_hash[date] += 1
+    end
+    
+    last_week_count = result_hash.values.reverse
+    last_week_count
+  end
+
+  # 问题24小时内的回复数，按小时排序
+  def last_day_replies_count
+    replies = self.replies.within_one_day
+    result_hash = get_last_day_hash
+
+    replies.each do |reply|
+      hour = reply.created_at.strftime("%H")
+      result_hash[hour] += 1
+    end
+  
+    last_day_count = result_hash.values.reverse
+    last_day_count
+  end
+
   def self.notify_topic_created(topic_id)
     topic = Topic.find_by_id(topic_id)
     return unless topic && topic.user
@@ -287,5 +315,41 @@ class Topic < ApplicationRecord
       @total_pages = 60
     end
     @total_pages
+  end
+
+  private
+
+  def unshift_fill_array(array, num)
+    tmp_array = array.dup
+    len = tmp_array.size
+    return tmp_array if len >= num
+
+    while len < num
+      tmp_array.unshift(0)
+      len += 1
+    end
+    tmp_array
+  end
+
+  def get_last_week_hash
+    tmp_week_hash = {}
+    current_time = Time.now
+    
+    7.times do |i|
+      date = (current_time - i.days).strftime("%m%d")
+      tmp_week_hash[date] = 0
+    end
+    tmp_week_hash
+  end
+
+  def get_last_day_hash
+    tmp_day_hash = {}
+    current_time = Time.now
+    
+    24.times do |i|
+      hour = (current_time - i.hours).strftime("%H")
+      tmp_day_hash[hour] = 0
+    end
+    tmp_day_hash
   end
 end
