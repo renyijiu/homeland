@@ -8,6 +8,4 @@ class ApplicationRecord < ActiveRecord::Base
   scope :by_week, -> { where("created_at > ?", 7.days.ago.utc) }
 
   delegate :url_helpers, to: "Rails.application.routes"
-
-  hash_key :last_update_time_for_hits
 end

@@ -33,6 +33,7 @@ class Topic < ApplicationRecord
   counter :hits, default: 0
   list :seven_days_hits, maxlength: 7
   list :recent_day_hits, maxlength: 24
+  value :last_update_time_for_hits
 
   delegate :login, to: :user, prefix: true, allow_nil: true
   delegate :body, to: :last_reply, prefix: true, allow_nil: true
@@ -212,31 +213,34 @@ class Topic < ApplicationRecord
   end
 
   def hot_hits_incr(num)
-    current_time = Time.current
-    day = current_time.strftime("%d").to_i
-    hour = current_time.strftime("%H").to_i
+    current_time = Time.now
+    
+    last_update_time = self.last_update_time_for_hits.try(:value) || current_time.to_s
+    last_update_time = last_update_time.to_datetime 
 
-    last_update_time = self.last_update_time_for_hits.to_h
-    last_day = last_update_time.fetch("day", -1).to_i
-    last_hour = last_update_time.fetch("hour", -1).to_i
+    hours_diff = (current_time.change(min: 0) - last_update_time.change(min:0)) / 3600
+    days_diff = (current_time.change(hour: 0) - last_update_time.change(hour: 0)) / 86400
 
-    if (last_day == day) && (!self.seven_days_hits.last.nil?)
-      _tmp_day_hits = self.seven_days_hits[-1].to_i
-      _tmp_day_hits += num
-      self.seven_days_hits[-1] = _tmp_day_hits
-    else
+    hours_diff.to_i.times { self.recent_day_hits << 0 }
+    days_diff.to_i.times { self.seven_days_hits << 0 }
+
+    if self.seven_days_hits.last.nil?
       self.seven_days_hits << num
-      self.last_update_time_for_hits["day"] = day
+    else
+      tmp_week_hits = self.seven_days_hits[-1].to_i
+      tmp_week_hits += num
+      self.seven_days_hits[-1] = tmp_week_hits
     end
 
-    if (last_hour == hour) && (!self.recent_day_hits.last.nil?)
-      _tmp_hour_hits = self.recent_day_hits[-1].to_i
-      _tmp_hour_hits += num
-      self.recent_day_hits[-1] = _tmp_hour_hits
-    else
+    if self.recent_day_hits.last.nil?
       self.recent_day_hits << num
-      self.last_update_time_for_hits["hour"] = hour
+    else
+      tmp_hour_hits = self.recent_day_hits[-1].to_i
+      tmp_hour_hits += num
+      self.recent_day_hits[-1] = tmp_hour_hits
     end
+
+    self.last_update_time_for_hits.value = current_time.to_s
   end
 
   # 问题一周内的回复数，按天排序
