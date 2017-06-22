@@ -249,7 +249,7 @@ class Topic < ApplicationRecord
     result_hash = get_last_week_hash
     
     replies.each do |reply|
-      date = reply.created_at.strftime("%m%d")
+      date = reply.created_at.utc.strftime("%m%d")
       result_hash[date] += 1
     end
     
@@ -263,7 +263,7 @@ class Topic < ApplicationRecord
     result_hash = get_last_day_hash
 
     replies.each do |reply|
-      hour = reply.created_at.strftime("%H")
+      hour = reply.created_at.utc.strftime("%H")
       result_hash[hour] += 1
     end
   
@@ -351,7 +351,7 @@ class Topic < ApplicationRecord
 
   def get_last_week_hash
     tmp_week_hash = {}
-    current_time = Time.now
+    current_time = Time.now.utc
     
     7.times do |i|
       date = (current_time - i.days).strftime("%m%d")
@@ -362,7 +362,7 @@ class Topic < ApplicationRecord
 
   def get_last_day_hash
     tmp_day_hash = {}
-    current_time = Time.now
+    current_time = Time.now.utc
     
     24.times do |i|
       hour = (current_time - i.hours).strftime("%H")

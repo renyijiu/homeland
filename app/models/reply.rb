@@ -19,8 +19,8 @@ class Reply < ApplicationRecord
 
   scope :without_system, -> { where(action: nil) }
   scope :fields_for_list, -> { select(:topic_id, :id, :body, :updated_at, :created_at) }
-  scope :within_seven_days, -> { where("created_at >= ?", 7.days.ago) }
-  scope :within_one_day, -> { where("created_at >= ?", 1.day.ago) }
+  scope :within_seven_days, -> { where("created_at >= ?", 6.days.ago.utc) }
+  scope :within_one_day, -> { where("created_at >= ?", 23.hours.ago.utc) }
 
   validates :body, presence: true, unless: -> { system_event? }
   validates :body, uniqueness: { scope: [:topic_id, :user_id], message: "不能重复提交。" }, unless: -> { system_event? }
